@@ -1,6 +1,6 @@
 import streamlit as st
+from audio_recorder_streamlit import audio_recorder
 from streamlit_server_state import server_state, server_state_lock
-from streamlit_recorder import st_recorder
 
 # Set up initial state
 with server_state_lock["chat_messages"]:
@@ -39,18 +39,14 @@ with st.beta_expander("Chat Messages"):
 # Message input with recording functionality
 message_input = st.text_input("Message", key="message_input", on_change=on_message_input)
 
-# Audio recording button
-recording_state = st_recorder(message_input, start_recording=False, key="recorder")
-if recording_state.is_recording:
-    st.info("Recording...")
-
-# Display recorded audio
-if recording_state.audio_data:
-    st.audio(recording_state.audio_data, format="audio/wav")
+# Audio recording using the provided audio_recorder
+audio_bytes = audio_recorder()
+if audio_bytes:
+    st.audio(audio_bytes, format="audio/wav")
 
 # Reset recording when a new message is submitted
-if recording_state.is_recording and message_input:
-    recording_state.clear()
+if audio_bytes and message_input:
+    audio_bytes = None
 
 # Submit button
 if st.button("Send Message"):
